@@ -1,0 +1,18 @@
+<svg width="200" height="50" viewBox="0 0 200 50" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <!-- Background Color -->
+  <rect width="100%" height="100%" fill="white" />
+
+  <!-- Logo Symbol: Pixel-like Squares -->
+  <g transform="translate(10, 10)">
+    <rect x="0" y="0" width="10" height="10" fill="#3C9DF6" />
+    <rect x="12" y="0" width="10" height="10" fill="#3C9DF6" />
+    <rect x="24" y="0" width="10" height="10" fill="#3C9DF6" />
+    <rect x="0" y="12" width="10" height="10" fill="#3C9DF6" />
+    <rect x="12" y="12" width="10" height="10" fill="#3C9DF6" />
+  </g>
+
+  <!-- Text: Pixelyze -->
+  <text x="60" y="30" font-family="Arial, sans-serif" font-size="24" fill="#333333" font-weight="bold">
+    PIXELYZE
+  </text>
+</svg>

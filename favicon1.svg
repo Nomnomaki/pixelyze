@@ -1,0 +1,8 @@
+<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+  <!-- Pixel-like Squares -->
+  <rect x="2" y="2" width="10" height="10" fill="#3C9DF6" />
+  <rect x="14" y="2" width="10" height="10" fill="#3C9DF6" />
+  <rect x="26" y="2" width="10" height="10" fill="#3C9DF6" />
+  <rect x="2" y="14" width="10" height="10" fill="#3C9DF6" />
+  <rect x="14" y="14" width="10" height="10" fill="#3C9DF6" />
+</svg>
