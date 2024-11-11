@@ -7,23 +7,15 @@ interface MongooseConnection {
   promise: Promise<Mongoose> | null;
 }
 
-// Extend the NodeJS global interface to include mongoose
+// Extend the global object to include mongoose
 declare global {
-  namespace NodeJS {
-    interface Global {
-      mongoose: MongooseConnection;
-    }
-  }
+  var mongoose: MongooseConnection | undefined;
 }
 
-const globalWithMongoose = global as typeof global & {
-  mongoose: MongooseConnection;
-};
-
-let cached = globalWithMongoose.mongoose;
+let cached = global.mongoose;
 
 if (!cached) {
-  cached = globalWithMongoose.mongoose = {
+  cached = global.mongoose = {
     conn: null,
     promise: null,
   };
@@ -36,10 +28,12 @@ export const connectToDatabase = async () => {
 
   cached.promise =
     cached.promise ||
-    mongoose.connect(MONGODB_URL, {
-      dbName: "imaginify",
-      bufferCommands: false,
-    });
+    mongoose
+      .connect(MONGODB_URL, {
+        dbName: "imaginify",
+        bufferCommands: false,
+      })
+      .then((mongoose) => mongoose);
 
   cached.conn = await cached.promise;
 
