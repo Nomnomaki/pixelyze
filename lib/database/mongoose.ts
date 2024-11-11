@@ -1,4 +1,3 @@
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 import mongoose, { Mongoose } from "mongoose";
 
 const MONGODB_URL = process.env.MONGODB_URL;
@@ -8,23 +7,30 @@ interface MongooseConnection {
   promise: Promise<Mongoose> | null;
 }
 
-let cached: MongooseConnection = (global as any).mongoose; //creating a buffer coz of next.js
-
-if (!cached) {
-  //checking if a "cached" exist or a connection is already established
-  cached = (global as any).mongoose = { conn: null, promise: null };
+// Extend the NodeJS global interface to include mongoose property
+declare global {
+  var mongoose: MongooseConnection | undefined;
 }
 
-export const connectToDatabase = async () => {
+// Use a global variable to cache the mongoose connection across Next.js requests
+let cached: MongooseConnection = globalThis.mongoose || {
+  conn: null,
+  promise: null,
+};
+
+// If the cache is not initialized, initialize it
+globalThis.mongoose = cached;
+
+export const connectToDatabase = async (): Promise<Mongoose> => {
   if (cached.conn) {
     return cached.conn;
   }
 
   if (!MONGODB_URL) {
-    //checking if the .env file has the mongo url
     throw new Error("Missing MONGODB_URL");
   }
-  //checking if connect is already established or notv
+
+  // Establish a new connection if one is not cached
   cached.promise =
     cached.promise ||
     mongoose.connect(MONGODB_URL, {
