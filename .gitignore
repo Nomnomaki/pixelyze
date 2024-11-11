@@ -22,7 +22,7 @@ coverage/
 # Environment variables
 .env.local
 .env.development.local
-.env.test.local
+.env.test.localx``
 .env.production.local
 .env
 
