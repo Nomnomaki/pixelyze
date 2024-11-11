@@ -1,28 +1,27 @@
 /* eslint-disable prefer-const */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-prototype-builtins */
 
-import { type ClassValue, clsx } from "clsx";
+import { clsx } from "clsx";
 import qs from "qs";
 import { twMerge } from "tailwind-merge";
 
 import { aspectRatioOptions } from "@/constants";
 
-export function cn(...inputs: ClassValue[]) {
+// Function to merge class names with Tailwind's merge utility
+export function cn(...inputs: (string | undefined)[]) {
   return twMerge(clsx(inputs));
 }
 
 // ERROR HANDLER
 export const handleError = (error: unknown) => {
   if (error instanceof Error) {
-    // This is a native JavaScript error (e.g., TypeError, RangeError)
     console.error(error.message);
     throw new Error(`Error: ${error.message}`);
   } else if (typeof error === "string") {
-    // This is a string error message
     console.error(error);
     throw new Error(`Error: ${error}`);
   } else {
-    // This is an unknown type of error
     console.error(error);
     throw new Error(`Unknown error: ${JSON.stringify(error)}`);
   }
@@ -51,14 +50,17 @@ const toBase64 = (str: string) =>
 export const dataUrl = `data:image/svg+xml;base64,${toBase64(
   shimmer(1000, 1000)
 )}`;
-// ==== End
 
 // FORM URL QUERY
 export const formUrlQuery = ({
   searchParams,
   key,
   value,
-}: FormUrlQueryParams) => {
+}: {
+  searchParams: URLSearchParams;
+  key: string;
+  value: string | number | null;
+}) => {
   const params = { ...qs.parse(searchParams.toString()), [key]: value };
 
   return `${window.location.pathname}?${qs.stringify(params, {
@@ -70,14 +72,16 @@ export const formUrlQuery = ({
 export function removeKeysFromQuery({
   searchParams,
   keysToRemove,
-}: RemoveUrlQueryParams) {
-  const currentUrl = qs.parse(searchParams);
+}: {
+  searchParams: URLSearchParams;
+  keysToRemove: string[];
+}) {
+  const currentUrl = qs.parse(searchParams.toString());
 
   keysToRemove.forEach((key) => {
     delete currentUrl[key];
   });
 
-  // Remove null or undefined values
   Object.keys(currentUrl).forEach(
     (key) => currentUrl[key] == null && delete currentUrl[key]
   );
@@ -86,19 +90,19 @@ export function removeKeysFromQuery({
 }
 
 // DEBOUNCE
-export const debounce = (func: (...args: any[]) => void, delay: number) => {
+export const debounce = (func: (...args: unknown[]) => void, delay: number) => {
   let timeoutId: NodeJS.Timeout | null;
-  return (...args: any[]) => {
+  return (...args: unknown[]) => {
     if (timeoutId) clearTimeout(timeoutId);
     timeoutId = setTimeout(() => func.apply(null, args), delay);
   };
 };
 
-// GE IMAGE SIZE
+// GET IMAGE SIZE
 export type AspectRatioKey = keyof typeof aspectRatioOptions;
 export const getImageSize = (
   type: string,
-  image: any,
+  image: Record<string, unknown>,
   dimension: "width" | "height"
 ): number => {
   if (type === "fill") {
@@ -107,7 +111,7 @@ export const getImageSize = (
       1000
     );
   }
-  return image?.[dimension] || 1000;
+  return (image?.[dimension] as number) || 1000;
 };
 
 // DOWNLOAD IMAGE
@@ -127,12 +131,16 @@ export const download = (url: string, filename: string) => {
         a.download = `${filename.replace(" ", "_")}.png`;
       document.body.appendChild(a);
       a.click();
+      document.body.removeChild(a);
     })
     .catch((error) => console.log({ error }));
 };
 
 // DEEP MERGE OBJECTS
-export const deepMergeObjects = (obj1: any, obj2: any) => {
+export const deepMergeObjects = (
+  obj1: Record<string, unknown>,
+  obj2: Record<string, unknown> | null | undefined
+) => {
   if (obj2 === null || obj2 === undefined) {
     return obj1;
   }
@@ -140,14 +148,17 @@ export const deepMergeObjects = (obj1: any, obj2: any) => {
   let output = { ...obj2 };
 
   for (let key in obj1) {
-    if (obj1.hasOwnProperty(key)) {
+    if (Object.prototype.hasOwnProperty.call(obj1, key)) {
       if (
         obj1[key] &&
         typeof obj1[key] === "object" &&
         obj2[key] &&
         typeof obj2[key] === "object"
       ) {
-        output[key] = deepMergeObjects(obj1[key], obj2[key]);
+        output[key] = deepMergeObjects(
+          obj1[key] as Record<string, unknown>,
+          obj2[key] as Record<string, unknown>
+        );
       } else {
         output[key] = obj1[key];
       }

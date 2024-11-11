@@ -7,41 +7,44 @@ interface MongooseConnection {
   promise: Promise<Mongoose> | null;
 }
 
-// Extend the NodeJS global interface to include mongoose property
+// Extend the NodeJS global interface to include mongoose
 declare global {
-  var mongoose: MongooseConnection | undefined;
+  namespace NodeJS {
+    interface Global {
+      mongoose: MongooseConnection;
+    }
+  }
 }
 
-// Use a global variable to cache the mongoose connection across Next.js requests
-let cached: MongooseConnection = globalThis.mongoose || {
-  conn: null,
-  promise: null,
+const globalWithMongoose = global as typeof global & {
+  mongoose: MongooseConnection;
 };
 
-// If the cache is not initialized, initialize it
-globalThis.mongoose = cached;
+let cached = globalWithMongoose.mongoose;
 
-export const connectToDatabase = async (): Promise<Mongoose> => {
-  if (cached.conn) {
-    return cached.conn;
-  }
+if (!cached) {
+  cached = globalWithMongoose.mongoose = {
+    conn: null,
+    promise: null,
+  };
+}
 
-  if (!MONGODB_URL) {
-    throw new Error("Missing MONGODB_URL");
-  }
+export const connectToDatabase = async () => {
+  if (cached.conn) return cached.conn;
 
-  // Establish a new connection if one is not cached
+  if (!MONGODB_URL) throw new Error("Missing MONGODB_URL");
+
   cached.promise =
     cached.promise ||
     mongoose.connect(MONGODB_URL, {
-      dbName: "Pixelyze",
+      dbName: "imaginify",
       bufferCommands: false,
     });
 
   cached.conn = await cached.promise;
+
   return cached.conn;
 };
-
 //cached is a global variable, stored in the global object, to maintain a single shared MongoDB connection
 //across the Next.js application. This is because in Next.js, each request could create a new instance,
 // so caching avoids reconnecting on each request, improving performance.
