@@ -1,5 +1,4 @@
-// Disable ESLint only for specific unused types if necessary
-// eslint-disable-next-line no-unused-vars
+/* eslint-disable no-unused-vars */
 
 // ====== USER PARAMS
 declare type CreateUserParams = {

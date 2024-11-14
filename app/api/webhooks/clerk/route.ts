@@ -1,10 +1,9 @@
 /* eslint-disable camelcase */
-import { clerkClient } from "@clerk/clerk-sdk-node";
+import { User as clerkClient } from "@clerk/clerk-sdk-node";
 import { WebhookEvent } from "@clerk/nextjs/server";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { Webhook } from "svix";
-
 import { createUser, deleteUser, updateUser } from "@/lib/actions/user.actions";
 
 export async function POST(req: Request) {
@@ -17,7 +16,7 @@ export async function POST(req: Request) {
     );
   }
 
-  // Get the headers
+  // Get the headers (no need to await here)
   const headerPayload = await headers();
   const svix_id = headerPayload.get("svix-id");
   const svix_timestamp = headerPayload.get("svix-timestamp");
@@ -25,7 +24,7 @@ export async function POST(req: Request) {
 
   // If there are no headers, error out
   if (!svix_id || !svix_timestamp || !svix_signature) {
-    return new Response("Error occured -- no svix headers", {
+    return new Response("Error: Missing svix headers", {
       status: 400,
     });
   }
@@ -48,7 +47,7 @@ export async function POST(req: Request) {
     }) as WebhookEvent;
   } catch (err) {
     console.error("Error verifying webhook:", err);
-    return new Response("Error occured", {
+    return new Response("Error: Verification failed", {
       status: 400,
     });
   }
@@ -65,7 +64,7 @@ export async function POST(req: Request) {
     const user = {
       clerkId: id,
       email: email_addresses[0].email_address,
-      username: username!,
+      username: username || "",
       firstName: first_name || "",
       lastName: last_name || "",
       photo: image_url,
@@ -75,7 +74,7 @@ export async function POST(req: Request) {
 
     // Set public metadata
     if (newUser) {
-      await clerkClient.users.updateUserMetadata(id, {
+      await clerkClient.updateUser(id, {
         publicMetadata: {
           userId: newUser._id,
         },
@@ -90,9 +89,9 @@ export async function POST(req: Request) {
     const { id, image_url, first_name, last_name, username } = evt.data;
 
     const user = {
-      firstName: first_name || "",
-      lastName: last_name || "",
-      username: username!,
+      firstName: first_name,
+      lastName: last_name,
+      username: username || "",
       photo: image_url,
     };
 
@@ -105,12 +104,12 @@ export async function POST(req: Request) {
   if (eventType === "user.deleted") {
     const { id } = evt.data;
 
-    const deletedUser = await deleteUser(id!);
+    const deletedUser = await deleteUser(id);
 
     return NextResponse.json({ message: "OK", user: deletedUser });
   }
 
-  console.log(`Webhook with and ID of ${id} and type of ${eventType}`);
+  console.log(`Unhandled webhook with ID ${id} and type ${eventType}`);
   console.log("Webhook body:", body);
 
   return new Response("", { status: 200 });
