@@ -1,4 +1,4 @@
-import { useAuth } from "@clerk/nextjs";
+import { auth } from "@clerk/nextjs/server";
 import Image from "next/image";
 import { redirect } from "next/navigation";
 
@@ -7,26 +7,11 @@ import Header from "@/components/shared/Header";
 import { getUserImages } from "@/lib/actions/image.actions";
 import { getUserById } from "@/lib/actions/user.actions";
 
-// Wrapper component to handle auth and redirection
-const ProfileWrapper = ({ searchParams }: SearchParamProps) => {
-  const { userId } = useAuth();
-
-  if (!userId) {
-    redirect("/sign-in");
-  }
-
-  return <Profile userId={userId} searchParams={searchParams} />;
-};
-
-// Async component to fetch user data
-const Profile = async ({
-  userId,
-  searchParams,
-}: {
-  userId: string;
-  searchParams: SearchParamProps["searchParams"];
-}) => {
+const Profile = async ({ searchParams }: SearchParamProps) => {
   const page = Number(searchParams?.page) || 1;
+  const { userId } = await auth();
+
+  if (!userId) redirect("/sign-in");
 
   const user = await getUserById(userId);
   const images = await getUserImages({ page, userId: user._id });
@@ -76,4 +61,4 @@ const Profile = async ({
   );
 };
 
-export default ProfileWrapper;
+export default Profile;
