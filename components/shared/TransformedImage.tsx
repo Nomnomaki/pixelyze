@@ -1,5 +1,4 @@
 "use client";
-
 import { dataUrl, debounce, download, getImageSize } from "@/lib/utils";
 import { CldImage, getCldImageUrl } from "next-cloudinary";
 import { PlaceholderValue } from "next/dist/shared/lib/get-img-props";
@@ -60,11 +59,15 @@ const TransformedImage = ({
             placeholder={dataUrl as PlaceholderValue}
             className="transformed-image"
             onLoad={() => {
-              setIsTransforming && setIsTransforming(false);
+              if (setIsTransforming) {
+                setIsTransforming(false);
+              }
             }}
             onError={() => {
               debounce(() => {
-                setIsTransforming && setIsTransforming(false);
+                if (setIsTransforming) {
+                  setIsTransforming(false);
+                }
               }, 8000)();
             }}
             {...transformationConfig}

@@ -1,20 +1,26 @@
 import { SignedIn } from "@clerk/nextjs";
 import { useAuth } from "@clerk/nextjs";
-
 import Image from "next/image";
 import { redirect } from "next/navigation";
-
 import Header from "@/components/shared/Header";
 import { Button } from "@/components/ui/button";
 import { plans } from "@/constants";
 import { getUserById } from "@/lib/actions/user.actions";
 import Checkout from "@/components/shared/Checkout";
 
-const Credits = async () => {
+// Wrapper component to use hooks
+const CreditsWrapper = () => {
   const { userId } = useAuth();
 
-  if (!userId) redirect("/sign-in");
+  if (!userId) {
+    redirect("/sign-in");
+  }
 
+  return <Credits userId={userId} />;
+};
+
+// Async component for data fetching
+const Credits = async ({ userId }: { userId: string }) => {
   const user = await getUserById(userId);
 
   return (
@@ -79,4 +85,4 @@ const Credits = async () => {
   );
 };
 
-export default Credits;
+export default CreditsWrapper;
