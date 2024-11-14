@@ -1,5 +1,5 @@
 /* eslint-disable camelcase */
-import { User as clerkClient } from "@clerk/clerk-sdk-node";
+import { clerkClient } from "@clerk/clerk-sdk-node";
 import { WebhookEvent } from "@clerk/nextjs/server";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
@@ -74,7 +74,7 @@ export async function POST(req: Request) {
 
     // Set public metadata
     if (newUser) {
-      await clerkClient.updateUser(id, {
+      await clerkClient.users.updateUser(id, {
         publicMetadata: {
           userId: newUser._id,
         },
@@ -89,10 +89,10 @@ export async function POST(req: Request) {
     const { id, image_url, first_name, last_name, username } = evt.data;
 
     const user = {
-      firstName: first_name,
-      lastName: last_name,
-      username: username || "",
-      photo: image_url,
+      firstName: first_name || "", // Default to an empty string if null
+      lastName: last_name || "", // Default to an empty string if null
+      username: username || "", // Default to an empty string if null
+      photo: image_url || "", // Default to an empty string if null
     };
 
     const updatedUser = await updateUser(id, user);
@@ -103,6 +103,11 @@ export async function POST(req: Request) {
   // DELETE
   if (eventType === "user.deleted") {
     const { id } = evt.data;
+
+    if (!id) {
+      console.error("Error: User ID is undefined for 'user.deleted' event");
+      return new Response("Error: User ID is undefined", { status: 400 });
+    }
 
     const deletedUser = await deleteUser(id);
 
