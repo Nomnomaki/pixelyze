@@ -1,17 +1,38 @@
+import React from "react";
 import { useAuth } from "@clerk/nextjs";
 import Image from "next/image";
 import { redirect } from "next/navigation";
-
 import { Collection } from "@/components/shared/Collection";
 import Header from "@/components/shared/Header";
 import { getUserImages } from "@/lib/actions/image.actions";
 import { getUserById } from "@/lib/actions/user.actions";
 
-const Profile = async ({ searchParams }: SearchParamProps) => {
-  const page = Number(searchParams?.page) || 1;
+// Define the SearchParamProps type
+type SearchParamProps = {
+  params: string;
+  searchParams: { [key: string]: string | string[] | undefined };
+};
+
+// Wrapper component to handle client-side hooks
+const ProfileWrapper = ({ searchParams }: SearchParamProps) => {
   const { userId } = useAuth();
 
-  if (!userId) redirect("/sign-in");
+  if (!userId) {
+    redirect("/sign-in");
+  }
+
+  return <Profile userId={userId} searchParams={searchParams} />;
+};
+
+// Async component to fetch data
+const Profile = async ({
+  userId,
+  searchParams,
+}: {
+  userId: string;
+  searchParams: { [key: string]: string | string[] | undefined };
+}) => {
+  const page = Number(searchParams?.page) || 1;
 
   const user = await getUserById(userId);
   const images = await getUserImages({ page, userId: user._id });
@@ -61,4 +82,4 @@ const Profile = async ({ searchParams }: SearchParamProps) => {
   );
 };
 
-export default Profile;
+export default ProfileWrapper;
