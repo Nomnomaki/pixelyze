@@ -1,19 +1,13 @@
-import React from "react";
 import { useAuth } from "@clerk/nextjs";
 import Image from "next/image";
 import { redirect } from "next/navigation";
+
 import { Collection } from "@/components/shared/Collection";
 import Header from "@/components/shared/Header";
 import { getUserImages } from "@/lib/actions/image.actions";
 import { getUserById } from "@/lib/actions/user.actions";
 
-// Define the SearchParamProps type
-type SearchParamProps = {
-  params: { [key: string]: string };
-  searchParams: { [key: string]: string | string[] | undefined };
-};
-
-// Wrapper component to handle client-side hooks
+// Wrapper component to handle auth and redirection
 const ProfileWrapper = ({ searchParams }: SearchParamProps) => {
   const { userId } = useAuth();
 
@@ -24,13 +18,13 @@ const ProfileWrapper = ({ searchParams }: SearchParamProps) => {
   return <Profile userId={userId} searchParams={searchParams} />;
 };
 
-// Async component to fetch data
+// Async component to fetch user data
 const Profile = async ({
   userId,
   searchParams,
 }: {
   userId: string;
-  searchParams: { [key: string]: string | string[] | undefined };
+  searchParams: SearchParamProps["searchParams"];
 }) => {
   const page = Number(searchParams?.page) || 1;
 
