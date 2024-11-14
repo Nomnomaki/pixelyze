@@ -9,7 +9,7 @@ import { getUserById } from "@/lib/actions/user.actions";
 
 // Define the SearchParamProps type
 type SearchParamProps = {
-  params: string;
+  params: { [key: string]: string };
   searchParams: { [key: string]: string | string[] | undefined };
 };
 
