@@ -36,7 +36,6 @@ export const handleError = (error: unknown): never => {
   }
 
   if (error instanceof Error) {
-    // Check for common authentication-related error messages
     if (
       error.message.toLowerCase().includes("auth") ||
       error.message.toLowerCase().includes("authentication") ||
@@ -74,7 +73,6 @@ export const handleError = (error: unknown): never => {
     throw new Error(`Error: ${error}`);
   }
 
-  // For unknown error types, try to extract meaningful information
   console.error("Unknown error type:", error);
   try {
     const errorString = JSON.stringify(error);
