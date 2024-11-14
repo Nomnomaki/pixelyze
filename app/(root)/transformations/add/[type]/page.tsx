@@ -8,11 +8,26 @@ import { redirect } from "next/navigation";
 const AddTransformationTypePage = async ({
   params: { type },
 }: SearchParamProps) => {
+  // Authenticate user
   const { userId } = await auth();
-  const transformation = transformationTypes[type];
 
-  if (!userId) redirect("/sign-in");
+  if (!userId) {
+    // Redirect to sign-in if not authenticated
+    redirect("/sign-in");
+    return null; // Return null to prevent the rest of the page from rendering
+  }
 
+  // Ensure transformation type exists
+  const transformation =
+    transformationTypes[type as keyof typeof transformationTypes];
+
+  if (!transformation) {
+    // Handle the case where the transformation type is invalid
+    redirect("/error"); // Or render an error message
+    return null;
+  }
+
+  // Fetch user data
   const user = await getUserById(userId);
 
   return (
